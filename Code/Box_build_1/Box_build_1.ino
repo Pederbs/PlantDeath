@@ -5,8 +5,8 @@
 
 // Define Constants
 const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
-const char *WIFI_SSID = "iProbe";                // Put here your Wi-Fi SSID
-const char *WIFI_PASS = "Torpedor";              // Put here your Wi-Fi password
+const char *WIFI_SSID = "PST";                // Put here your Wi-Fi SSID
+const char *WIFI_PASS = "987654321pink";              // Put here your Wi-Fi password
 const char *PUBLISH_DEVICE_LABEL = "demo";       // Put here your Device label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL1 = "soil1";   // Put here your Variable label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL2 = "soil2";   // Put here your Variable label to which data  will be published
@@ -19,7 +19,7 @@ const char *PUBLISH_VARIABLE_LABEL_HUMI = "humidity";
 
 Adafruit_AHTX0 aht;                          // Defines the function used to retrive temp and humi
 
-const int PUBLISH_FREQUENCY = 5000; // Update rate in millisecondsx
+const int PUBLISH_FREQUENCY = 300000; // Update every 5 minute
 
 float value1 = 0;
 float value2 = 0;
