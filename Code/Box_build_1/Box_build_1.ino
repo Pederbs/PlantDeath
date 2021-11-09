@@ -77,9 +77,9 @@ void loop(){
     value2 = analogRead(analogPin2);
     value3 = analogRead(analogPin3);
     
-    ubidots.add(PUBLISH_VARIABLE_LABEL1, value1); // Insert your variable Labels and the value to be sent
-    ubidots.add(PUBLISH_VARIABLE_LABEL2, value2); // Insert your variable Labels and the value to be sent
-    ubidots.add(PUBLISH_VARIABLE_LABEL3, value3); // Insert your variable Labels and the value to be sent
+    ubidots.add(PUBLISH_VARIABLE_LABEL1, value1);         // Insert your variable Labels and the value to be sent
+    ubidots.add(PUBLISH_VARIABLE_LABEL2, value2);         // Insert your variable Labels and the value to be sent
+    ubidots.add(PUBLISH_VARIABLE_LABEL3, value3);         // Insert your variable Labels and the value to be sent
     
     ubidots.add(PUBLISH_VARIABLE_LABEL_TEMP, value_temp); // Insert your variable Labels and the value to be sent
     ubidots.add(PUBLISH_VARIABLE_LABEL_HUMI, value_humi); // Insert your variable Labels and the value to be sent
