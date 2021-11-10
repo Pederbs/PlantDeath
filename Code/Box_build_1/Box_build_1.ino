@@ -21,16 +21,28 @@ Adafruit_AHTX0 aht;                          // Defines the function used to ret
 
 const int PUBLISH_FREQUENCY = 120000; // Update every 2 minute
 
-int value1 = 0;
-int value2 = 0;
-int value3 = 0;
+
+// VALUES
+int led1 = 0;
+int led2 = 0;
+int led3 = 0;
+int soil_value1 = 0;
+int soil_value2 = 0;
+int soil_value3 = 0;
 float value_temp = 0;
 float value_humi = 0;
-
 unsigned long timer = 1000;
-int analogPin1 = 34; // Pin used to read data from GPIO34 ADC_CH6. HØYERE
-int analogPin2 = 35; // Pin used to read data from GPIO35 ADC_CH?. MIDT
-int analogPin3 = 32; // Pin used to read data from GPIO32 ADC_C?. VENSTRE
+
+// INPUT PINS
+int soil_pin1 = 34; // Pin used to read data from GPIO34 ADC_CH6. HØYERE
+int soil_pin2 = 35; // Pin used to read data from GPIO35 ADC_CH7. MIDT
+int soil_pin3 = 32; // Pin used to read data from GPIO32 ADC_CH4. VENSTRE
+
+// OUTPUT PINS
+int led_pin1 = 13; // Pin used to light led1
+int led_pin2 = 12; // Pin used to light led2
+int led_pin3 = 14; // Pin used to light led3
+
 
 Ubidots ubidots(UBIDOTS_TOKEN);
 
@@ -49,7 +61,15 @@ void callback(char *topic, byte *payload, unsigned int length){
 // Main Functions
 
 void setup(){
-  aht.begin();                    // Starts the function to retreve temp and humid
+  pinMode(soil_pin1, INPUT);
+  pinMode(soil_pin2, INPUT);
+  pinMode(soil_pin3, INPUT);
+
+  pinMode(led_pin1, OUTPUT);
+  pinMode(led_pin2, OUTPUT);
+  pinMode(led_pin3, OUTPUT);
+
+  aht.begin();                // Starts the function to retreve temp and humid
   Serial.begin(115200);
   // ubidots.setDebug(true);  // uncomment this to make debug messages available
   ubidots.connectToWifi(WIFI_SSID, WIFI_PASS);
@@ -73,21 +93,21 @@ void loop(){
 
     value_temp = temp.temperature;
     value_humi = humidity.relative_humidity;
-    value1 = analogRead(analogPin1);
-    value2 = analogRead(analogPin2);
-    value3 = analogRead(analogPin3);
+    soil_value1 = analogRead(soil_pin1);
+    soil_value2 = analogRead(soil_pin2);
+    soil_value3 = analogRead(soil_pin3);
     
-    ubidots.add(PUBLISH_VARIABLE_LABEL1, value1); // Insert your variable Labels and the value to be sent
-    ubidots.add(PUBLISH_VARIABLE_LABEL2, value2); // Insert your variable Labels and the value to be sent
-    ubidots.add(PUBLISH_VARIABLE_LABEL3, value3); // Insert your variable Labels and the value to be sent
+    ubidots.add(PUBLISH_VARIABLE_LABEL1, soil_value1); // Insert your variable Labels and the value to be sent
+    ubidots.add(PUBLISH_VARIABLE_LABEL2, soil_value2); // Insert your variable Labels and the value to be sent
+    ubidots.add(PUBLISH_VARIABLE_LABEL3, soil_value3); // Insert your variable Labels and the value to be sent
     
     ubidots.add(PUBLISH_VARIABLE_LABEL_TEMP, value_temp); // Insert your variable Labels and the value to be sent
     ubidots.add(PUBLISH_VARIABLE_LABEL_HUMI, value_humi); // Insert your variable Labels and the value to be sent
 
     ubidots.publish(PUBLISH_DEVICE_LABEL);
-    Serial.print("Right soil-sens:    ");Serial.println(value1);
-    Serial.print("Middle soil-sens:    ");Serial.println(value2);
-    Serial.print("Left soil-sens:    ");Serial.println(value3);
+    Serial.print("Right soil-sens:    ");Serial.println(soil_value1);
+    Serial.print("Middle soil-sens:    ");Serial.println(soil_value2);
+    Serial.print("Left soil-sens:    ");Serial.println(soil_value3);
     Serial.print("Temperature:    "); Serial.print(temp.temperature); Serial.println(" degrees C");  //for feilsøking
     Serial.print("Humidity:    "); Serial.print(humidity.relative_humidity); Serial.println("% rH");  //for feilsøking
     timer = millis();
