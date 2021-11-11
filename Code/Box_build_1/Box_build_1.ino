@@ -5,7 +5,7 @@
 
 // Define Constants
 const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
-const char *WIFI_SSID = "PST";                // Put here your Wi-Fi SSID
+const char *WIFI_SSID = "G-boii Ziggzagg";                // Put here your Wi-Fi SSID
 const char *WIFI_PASS = "987654321pink";              // Put here your Wi-Fi password
 const char *PUBLISH_DEVICE_LABEL = "demo";       // Put here your Device label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL1 = "soil1";   // Put here your Variable label to which data  will be published
@@ -19,11 +19,11 @@ const char *PUBLISH_VARIABLE_LABEL_HUMI = "humidity";
 
 Adafruit_AHTX0 aht;                          // Defines the function used to retrive temp and humi
 
-const int PUBLISH_FREQUENCY = 300000; // Update every 5 minute
+const int PUBLISH_FREQUENCY = 120000; // Update every 2 minute
 
-float value1 = 0;
-float value2 = 0;
-float value3 = 0;
+int value1 = 0;
+int value2 = 0;
+int value3 = 0;
 float value_temp = 0;
 float value_humi = 0;
 
@@ -86,8 +86,8 @@ void loop(){
 
     ubidots.publish(PUBLISH_DEVICE_LABEL);
     Serial.print("Right soil-sens:    ");Serial.println(value1);
-    Serial.print("Right soil-sens:    ");Serial.println(value2);
-    Serial.print("Right soil-sens:    ");Serial.println(value3);
+    Serial.print("Middle soil-sens:    ");Serial.println(value2);
+    Serial.print("Left soil-sens:    ");Serial.println(value3);
     Serial.print("Temperature:    "); Serial.print(temp.temperature); Serial.println(" degrees C");  //for feilsøking
     Serial.print("Humidity:    "); Serial.print(humidity.relative_humidity); Serial.println("% rH");  //for feilsøking
     timer = millis();
