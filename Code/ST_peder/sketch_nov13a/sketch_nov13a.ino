@@ -21,29 +21,25 @@ void setup(){
   //digitalWrite(ledPin,HIGH);
 }
 
+int find_avg(int array[]){
+  int sum  = 0;                          // Sets the sum as 0 
+  for (int i = 0; i < num_readings; i++){sum += array[i];Serial.print(array[i]);Serial.println("  JEG KOMMER FRA FOR LOOP");}
+  int avg = sum / num_readings;          // Finding average
+  return avg;
+}
+
 void loop(){
   data[boot_counter] = analogRead(potPin);
-  Serial.println(analogRead(potPin));
-  if (boot_counter >= num_readings){
-    long timeCount = micros();
-    int sum = 0;
-    for (int i = 0; i <= boot_counter; i++){
-      sum = sum + data[i];
-      Serial.print("Summen er: ");Serial.println(sum);
-      Serial.println();
-      Serial.print("Data er: ");Serial.println(data[i]);
-    }
-    avg = sum / num_readings;
-    
-    timeCount = micros() - timeCount;
-    Serial.print("Average of the list of X values is   ");
-    Serial.print(avg);
+  Serial.println(data[boot_counter]);
+  Serial.println();
+  if (boot_counter >= (num_readings - 1)){
+    avg = find_avg(data);
     Serial.println();
-    Serial.print(timeCount);
-    Serial.println("us");
+    Serial.print("__________Average of the list of X values is   ");
+    Serial.println(avg);
+
     boot_counter = 0;
   }
   boot_counter++;
   esp_deep_sleep_start();
-  //delay(1000);
 }
