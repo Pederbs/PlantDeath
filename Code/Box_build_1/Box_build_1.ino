@@ -5,7 +5,7 @@
 
 // Define Constants
 const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
-const char *WIFI_SSID = "G-boii Ziggzagg";                // Put here your Wi-Fi SSID
+const char *WIFI_SSID = "PST";                // Put here your Wi-Fi SSID
 const char *WIFI_PASS = "987654321pink";              // Put here your Wi-Fi password
 const char *PUBLISH_DEVICE_LABEL = "demo";       // Put here your Device label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL1 = "soil1";   // Put here your Variable label to which data  will be published
@@ -15,17 +15,13 @@ const char *PUBLISH_VARIABLE_LABEL3 = "soil3";   // Put here your Variable label
 const char *PUBLISH_VARIABLE_LABEL_TEMP = "temperature";
 const char *PUBLISH_VARIABLE_LABEL_HUMI = "humidity";
 
-#define num_readings 5
-#define sleep_time 5
+#define num_readings 10
+#define sleep_time 60
 #define seconds 1000000
 //const char *SUBSCRIBE_DEVICE_LABEL = "";   // Replace with the device label to subscribe to
 //const char *SUBSCRIBE_VARIABLE_LABEL = ""; // Replace with the variable label to subscribe to
 
 Adafruit_AHTX0 aht;                          // Defines the function used to retrive temp and humi
-
-const int PUBLISH_FREQUENCY = 10000; // Update every 10 sec
-
-
 
 
 // VALUES
@@ -88,7 +84,8 @@ int find_avg(int array[]){
     sum += array[i];                       // Adds value to the sum 
   }
   int avg = sum / num_readings;          // Finding average
-  return avg;
+  int percent_avg = map(avg,0,4095,0,100);  // Finding the value in percent
+  return percent_avg;
 }
 
 int get_soil(int pin){
@@ -96,8 +93,7 @@ int get_soil(int pin){
    * A function that finds the percent of soilmoisture in the soil
    */
   int value = analogRead(pin);              // Reads the pin value
-  int percent = map(value,0,4095,0,100);  // Finding the value in percent
-  return percent;
+  return value;
 }
 
 // Main Functions
