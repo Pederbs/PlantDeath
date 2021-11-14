@@ -5,7 +5,7 @@
 
 // Define Constants
 const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
-const char *WIFI_SSID = "PST";                // Put here your Wi-Fi SSID
+const char *WIFI_SSID = "NSB_INTERAKTIV";                // Put here your Wi-Fi SSID
 const char *WIFI_PASS = "987654321pink";              // Put here your Wi-Fi password
 const char *PUBLISH_DEVICE_LABEL = "demo";       // Put here your Device label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL1 = "soil1";   // Put here your Variable label to which data  will be published
@@ -16,7 +16,7 @@ const char *PUBLISH_VARIABLE_LABEL_TEMP = "temperature";
 const char *PUBLISH_VARIABLE_LABEL_HUMI = "humidity";
 
 #define num_readings 10
-#define sleep_time 60
+#define sleep_time 30
 #define seconds 1000000
 //const char *SUBSCRIBE_DEVICE_LABEL = "";   // Replace with the device label to subscribe to
 //const char *SUBSCRIBE_VARIABLE_LABEL = ""; // Replace with the variable label to subscribe to
@@ -127,11 +127,17 @@ void setup(){
     boot_counter = 0;                     // Resets the boot counter for new data collection
 
     Serial.begin(115200);
+    
+    Serial.println("god dag!");
     // ubidots.setDebug(true);  // uncomment this to make debug messages available
     ubidots.connectToWifi(WIFI_SSID, WIFI_PASS);
+    Serial.println("1");
     ubidots.setCallback(callback);
+    Serial.println("2");
     ubidots.setup();
+    Serial.println("3");
     ubidots.reconnect();
+    Serial.println("4");
     //ubidots.subscribeLastValue(SUBSCRIBE_DEVICE_LABEL, SUBSCRIBE_VARIABLE_LABEL); // Insert the device and variable's Labels, respectively
   }
   aht.begin();                // Starts the function to retreve temp and humid
@@ -146,7 +152,8 @@ void setup(){
 void loop(){
   // put your main code here, to run repeatedly:
   if (!ubidots.connected()){
-    ubidots.reconnect();
+    esp_deep_sleep_start();
+    //ubidots.reconnect();
     //ubidots.subscribeLastValue(SUBSCRIBE_DEVICE_LABEL, SUBSCRIBE_VARIABLE_LABEL); // Insert the device and variable's Labels, respectively
   }
   
