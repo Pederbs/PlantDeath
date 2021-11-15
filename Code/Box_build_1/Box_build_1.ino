@@ -2,6 +2,7 @@
 // Include Libraries
 #include "UbidotsEsp32Mqtt.h"
 #include <Adafruit_AHTX0.h>
+#include <WiFi.h>
 
 // Define Constants
 const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
@@ -34,6 +35,7 @@ int soil_avg3 = 0;
 float value_temp = 0;
 float value_humi = 0;
 unsigned long timer = 1000;
+int not_connected_counter = 0;
 
 // INPUT PINS
 int soil_pin1 = 34; // Pin used to read data from GPIO34 ADC_CH6. HØYERE
@@ -127,10 +129,21 @@ void setup(){
     boot_counter = 0;                     // Resets the boot counter for new data collection
 
     Serial.begin(115200);
+
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.println("Wifi connecting...");
+      delay(500);
+      not_connected_counter += 1;
+      if(not_connected_counter > 50) { // Reset board if not connected after 5s
+        Serial.println("Resetting due to Wifi not connecting...");
+        ESP.restart();
+      }
+    }
+    Serial.println("Wifi connected");
     
-    Serial.println("god dag!");
     // ubidots.setDebug(true);  // uncomment this to make debug messages available
-    ubidots.connectToWifi(WIFI_SSID, WIFI_PASS);
+    //ubidots.connectToWifi(WIFI_SSID, WIFI_PASS);
     Serial.println("1");
     ubidots.setCallback(callback);
     Serial.println("2");
