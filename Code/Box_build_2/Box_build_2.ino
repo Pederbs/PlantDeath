@@ -69,16 +69,16 @@ float find_avg(float array[]){
   /* 
    * A function that finds the average of the sensor array given as argument 
    */
-  int sum  = 0;                          // Sets the sum as 0 
+  float sum  = 0;                          // Sets the sum as 0 
   for (int i = 0; i < num_readings; i++){  // Uses a for loop to iterate througt all values in the array
     sum += array[i];                       // Adds value to the sum 
+    Serial.print("   ");Serial.println(array[i]);
   }
-  int avg = sum / num_readings;          // Finding average
-  int percent_avg = map(avg,0,4095,0,100);  // Finding the value in percent
-  return percent_avg;
+  float avg = sum / num_readings;          // Finding average
+  //int percent_avg = map(avg,0,4095,0,100);  // Finding the value in percent
+  return avg;
 }
 
-/*
 void WiFi_status_control(){
   while (WiFi.status() != WL_CONNECTED) {
     Serial.println("Wifi connecting...");
@@ -90,7 +90,6 @@ void WiFi_status_control(){
     }
   }
 }
-*/
 
 // Main Functions
 
@@ -106,8 +105,11 @@ void setup(){
   //Defining wakeup reasons
   esp_sleep_enable_timer_wakeup(sleep_time*seconds);
 
+  //Setting up ext lib's
+  aht.begin();                // Starts the function to retreve temp and humid
+
   // Boot counter still in progress. Gather soil data and store it.
-  if(boot_counter != (num_readings-1)){
+  if(boot_counter != (num_readings)){
     sensors_event_t humidity,temp;
     aht.getEvent(&humidity, &temp);
     
@@ -133,27 +135,17 @@ void setup(){
 
     // Set up WiFi connection and Ubidots
     WiFi.begin(WIFI_SSID, WIFI_PASS);
-    while (WiFi.status() != WL_CONNECTED) {
-      Serial.println("Wifi connecting...");
-      delay(500);
-      not_connected_counter += 1;
-      if(not_connected_counter > 50) { // Reset board if not connected after 5s
-        Serial.println("Resetting due to Wifi not connecting...");
-        ESP.restart();
-        }
-    }
-    //WiFi_status_control();
+    WiFi_status_control();
     Serial.println("Wifi connected");
     ubidots.setup();
     ubidots.reconnect();
   }
-  aht.begin();                // Starts the function to retreve temp and humid
 
   temp_avg  = find_avg(temperature_array);
   humid_avg = find_avg(humidity_array);
-  soil_avg1 = find_avg(soil1_array);
-  soil_avg2 = find_avg(soil2_array);
-  soil_avg3 = find_avg(soil3_array);
+  soil_avg1 = map(find_avg(soil1_array),0,4095,0,100);
+  soil_avg2 = map(find_avg(soil2_array),0,4095,0,100);
+  soil_avg3 = map(find_avg(soil3_array),0,4095,0,100);
   
   ubidots.add(PUBLISH_VARIABLE_LABEL1, soil_avg1); // Insert your variable Labels and the value to be sent
   ubidots.add(PUBLISH_VARIABLE_LABEL2, soil_avg2); // Insert your variable Labels and the value to be sent
