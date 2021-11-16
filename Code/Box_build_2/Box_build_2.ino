@@ -78,20 +78,19 @@ float find_avg(float array[]){
   return percent_avg;
 }
 
+/*
 void WiFi_status_control(){
   while (WiFi.status() != WL_CONNECTED) {
-      Serial.println("Wifi connecting...");
-      delay(500);
-      not_connected_counter += 1;
-      if(not_connected_counter > 50) { // Reset board if not connected after 5s
-        Serial.println("Resetting due to Wifi not connecting...");
-        ESP.restart();
-      }
+    Serial.println("Wifi connecting...");
+    delay(500);
+    not_connected_counter += 1;
+    if(not_connected_counter > 50) { // Reset board if not connected after 5s
+      Serial.println("Resetting due to Wifi not connecting...");
+      ESP.restart();
     }
+  }
 }
-
-
-
+*/
 
 // Main Functions
 
@@ -106,10 +105,9 @@ void setup(){
 
   //Defining wakeup reasons
   esp_sleep_enable_timer_wakeup(sleep_time*seconds);
-  boot_counter++;
 
   // Boot counter still in progress. Gather soil data and store it.
-  if(boot_counter != num_readings-1){
+  if(boot_counter != (num_readings-1)){
     sensors_event_t humidity,temp;
     aht.getEvent(&humidity, &temp);
     
@@ -121,6 +119,7 @@ void setup(){
     temperature_array[boot_counter] = temp.temperature;
 
     // Makes the ESP go back to sleep
+    boot_counter++;
     esp_deep_sleep_start();
   }
 
@@ -134,15 +133,21 @@ void setup(){
 
     // Set up WiFi connection and Ubidots
     WiFi.begin(WIFI_SSID, WIFI_PASS);
-    WiFi_status_control();
+    while (WiFi.status() != WL_CONNECTED) {
+      Serial.println("Wifi connecting...");
+      delay(500);
+      not_connected_counter += 1;
+      if(not_connected_counter > 50) { // Reset board if not connected after 5s
+        Serial.println("Resetting due to Wifi not connecting...");
+        ESP.restart();
+        }
+    }
+    //WiFi_status_control();
     Serial.println("Wifi connected");
     ubidots.setup();
     ubidots.reconnect();
   }
   aht.begin();                // Starts the function to retreve temp and humid
-}
-
-void loop(){            // populate temp objects with fresh data
 
   temp_avg  = find_avg(temperature_array);
   humid_avg = find_avg(humidity_array);
@@ -165,4 +170,8 @@ void loop(){            // populate temp objects with fresh data
   Serial.print("Humidity:    "); Serial.print(humid_avg); Serial.println("% rH");  //for feilsøking
   
   esp_deep_sleep_start();
+}
+
+void loop(){            // populate temp objects with fresh data
+  Serial.println("PASS PÅ NAA ER JEG I VOID LOOP");
 }
