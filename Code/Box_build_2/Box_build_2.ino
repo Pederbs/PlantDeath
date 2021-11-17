@@ -6,18 +6,17 @@
 
 // Define Constants
 const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
-const char *WIFI_SSID = "iProbe";                // Put here your Wi-Fi SSID
-const char *WIFI_PASS = "Torpedor";              // Put here your Wi-Fi password
+const char *WIFI_SSID = "NSB_INTERAKTIV";                // Put here your Wi-Fi SSID
+const char *WIFI_PASS = "987654321pink";              // Put here your Wi-Fi password
 const char *PUBLISH_DEVICE_LABEL = "demo";       // Put here your Device label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL1 = "soil1";   // Put here your Variable label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL2 = "soil2";   // Put here your Variable label to which data  will be published
 const char *PUBLISH_VARIABLE_LABEL3 = "soil3";   // Put here your Variable label to which data  will be published
-
 const char *PUBLISH_VARIABLE_LABEL_TEMP = "temperature";
-const char *PUBLISH_VARIABLE_LABEL_HUMI = "humidity";
+const char *PUBLISH_VARIABLE_LABEL_HUMID = "humidity";
 
-#define num_readings 5
-#define sleep_time 5
+#define num_readings 10
+#define sleep_time 60
 #define seconds 1000000
 
 Adafruit_AHTX0 aht;                          // Defines the function used to retrive temp and humi
@@ -58,8 +57,8 @@ RTC_DATA_ATTR float temperature_array[num_readings];
 RTC_DATA_ATTR int last_soil_avg1;
 RTC_DATA_ATTR int last_soil_avg2;
 RTC_DATA_ATTR int last_soil_avg3;
-RTC_DATA_ATTR float last_humidity_avg;
-RTC_DATA_ATTR float last_temperature_avg;
+RTC_DATA_ATTR float last_humid_avg;
+RTC_DATA_ATTR float last_temp_avg;
 
 
 Ubidots ubidots(UBIDOTS_TOKEN);
@@ -72,24 +71,28 @@ float find_avg(float array[]){
   float sum  = 0;                          // Sets the sum as 0 
   for (int i = 0; i < num_readings; i++){  // Uses a for loop to iterate througt all values in the array
     sum += array[i];                       // Adds value to the sum 
-    Serial.print("   ");Serial.println(array[i]);
+    // Serial.print("   ");Serial.println(array[i]);
   }
   float avg = sum / num_readings;          // Finding average
-  //int percent_avg = map(avg,0,4095,0,100);  // Finding the value in percent
   return avg;
 }
 
 void WiFi_status_control(){
+  /* 
+   * A function that checks WiFi connection and resets the device if
+   * it doesn't connect within 30 seconds.  
+   */
   while (WiFi.status() != WL_CONNECTED) {
     Serial.println("Wifi connecting...");
     delay(500);
     not_connected_counter += 1;
-    if(not_connected_counter > 50) { // Reset board if not connected after 5s
+    if(not_connected_counter > 60) { // Reset board if not connected after 30s
       Serial.println("Resetting due to Wifi not connecting...");
       ESP.restart();
     }
   }
 }
+
 
 // Main Functions
 
@@ -140,30 +143,47 @@ void setup(){
     ubidots.setup();
     ubidots.reconnect();
   }
-
+  // Find average values of the stored array values
   temp_avg  = find_avg(temperature_array);
   humid_avg = find_avg(humidity_array);
-  soil_avg1 = map(find_avg(soil1_array),0,4095,0,100);
+  // maps the 12-bit average into percentage moisture, where 0% is completly dry and 100% is soaked
+  soil_avg1 = map(find_avg(soil1_array),0,4095,0,100); 
   soil_avg2 = map(find_avg(soil2_array),0,4095,0,100);
   soil_avg3 = map(find_avg(soil3_array),0,4095,0,100);
   
-  ubidots.add(PUBLISH_VARIABLE_LABEL1, soil_avg1); // Insert your variable Labels and the value to be sent
-  ubidots.add(PUBLISH_VARIABLE_LABEL2, soil_avg2); // Insert your variable Labels and the value to be sent
-  ubidots.add(PUBLISH_VARIABLE_LABEL3, soil_avg3); // Insert your variable Labels and the value to be sent
-  
-  ubidots.add(PUBLISH_VARIABLE_LABEL_TEMP, temp_avg); // Insert your variable Labels and the value to be sent
-  ubidots.add(PUBLISH_VARIABLE_LABEL_HUMI, humid_avg); // Insert your variable Labels and the value to be sent
+  // Pair the values with the publish variables respectivly if the value is different from last value
+  if (soil_avg1 != last_soil_avg1) {
+    ubidots.add(PUBLISH_VARIABLE_LABEL1, soil_avg1);
+    last_soil_avg1 = soil_avg1;
+  }
+  if (soil_avg2 != last_soil_avg2) {
+    ubidots.add(PUBLISH_VARIABLE_LABEL2, soil_avg2);
+    last_soil_avg2 = soil_avg2;
+  }
+  if (soil_avg3 != last_soil_avg3) {
+    ubidots.add(PUBLISH_VARIABLE_LABEL3, soil_avg3);
+    last_soil_avg3 = soil_avg3;
+  }
+  if (temp_avg != last_temp_avg) {
+    ubidots.add(PUBLISH_VARIABLE_LABEL_TEMP, temp_avg);
+    last_temp_avg = temp_avg;
+  }
+  if (humid_avg != last_humid_avg) {
+    ubidots.add(PUBLISH_VARIABLE_LABEL_HUMID, humid_avg);
+    last_humid_avg = humid_avg;
+  }
 
   ubidots.publish(PUBLISH_DEVICE_LABEL);
+
   Serial.print("Right soil-sens:    ");Serial.println(soil_avg1);
   Serial.print("Middle soil-sens:    ");Serial.println(soil_avg2);
   Serial.print("Left soil-sens:    ");Serial.println(soil_avg3);
-  Serial.print("Temperature:    "); Serial.print(temp_avg); Serial.println(" degrees C");  //for feilsøking
-  Serial.print("Humidity:    "); Serial.print(humid_avg); Serial.println("% rH");  //for feilsøking
+  Serial.print("Temperature:    "); Serial.print(temp_avg); Serial.println(" degrees C"); 
+  Serial.print("Humidity:    "); Serial.print(humid_avg); Serial.println("% rH"); 
   
   esp_deep_sleep_start();
 }
 
-void loop(){            // populate temp objects with fresh data
+void loop(){            
   Serial.println("PASS PÅ NAA ER JEG I VOID LOOP");
 }
