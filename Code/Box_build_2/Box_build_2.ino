@@ -5,21 +5,27 @@
 #include <WiFi.h>
 
 // Define Constants
-const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";            // Put here your Ubidots TOKEN
-const char *WIFI_SSID = "NSB_INTERAKTIV";                // Put here your Wi-Fi SSID
-const char *WIFI_PASS = "987654321pink";              // Put here your Wi-Fi password
-const char *PUBLISH_DEVICE_LABEL = "demo";       // Put here your Device label to which data  will be published
-const char *PUBLISH_VARIABLE_LABEL1 = "soil1";   // Put here your Variable label to which data  will be published
-const char *PUBLISH_VARIABLE_LABEL2 = "soil2";   // Put here your Variable label to which data  will be published
-const char *PUBLISH_VARIABLE_LABEL3 = "soil3";   // Put here your Variable label to which data  will be published
-const char *PUBLISH_VARIABLE_LABEL_TEMP = "temperature";
-const char *PUBLISH_VARIABLE_LABEL_HUMID = "humidity";
+const char *UBIDOTS_TOKEN = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";  // Put here your Ubidots TOKEN
+const char *WIFI_SSID = "NSB_INTERAKTIV";                           // Put here your Wi-Fi SSID
+const char *WIFI_PASS = "987654321pink";                            // Put here your Wi-Fi password
+const char *PUBLISH_DEVICE_LABEL = "demo";                          // Put here your Device label to which data  will be published
+const char *PUBLISH_VARIABLE_LABEL1 = "soil1";                      // Put here your Variable label to which data  will be published
+const char *PUBLISH_VARIABLE_LABEL2 = "soil2";                      // Put here your Variable label to which data  will be published
+const char *PUBLISH_VARIABLE_LABEL3 = "soil3";                      // Put here your Variable label to which data  will be published
+const char *PUBLISH_VARIABLE_LABEL_TEMP = "temperature";            // Put here your Variable label to which data  will be published
+const char *PUBLISH_VARIABLE_LABEL_HUMID = "humidity";              // Put here your Variable label to which data  will be published
 
-#define num_readings 10
-#define sleep_time 60
-#define seconds 1000000
+/* Configured to take measure sensors and sleep 20sec 
+ * before takeing new measure. Then repeat 30 times
+ * before publishing average. This adds up to publishing
+ * about every 10 minutes, depending on the time it takes
+ * to measure and connect to WiFi and ubidots.
+ */
+#define num_readings 30         // Sets how many times the ESP measures before finding average and publishes to Ubidots.
+#define sleep_time 20           // How long the ESP sleeps each time it goes to deep sleep in seconds.
+#define seconds 1000000         // Used for converting nanoseconds into seconds.
 
-Adafruit_AHTX0 aht;                          // Defines the function used to retrive temp and humi
+Adafruit_AHTX0 aht;             // Defines the function used to retrive temp and humid
 
 // VALUES
 int led1 = 0;
@@ -33,18 +39,12 @@ float humid_avg = 0;
 int not_connected_counter = 0;
 
 // INPUT PINS
-int soil_pin1 = 34; // Pin used to read data from GPIO34 ADC_CH6. HØYERE
-int soil_pin2 = 35; // Pin used to read data from GPIO35 ADC_CH7. MIDT
-int soil_pin3 = 32; // Pin used to read data from GPIO32 ADC_CH4. VENSTRE
-
-// OUTPUT PINS
-int led_pin1 = 13; // Pin used to light led1
-int led_pin2 = 12; // Pin used to light led2
-int led_pin3 = 14; // Pin used to light led3
-
+int soil_pin1 = 34;              // Pin used to read data from GPIO34 ADC_CH6. Right side
+int soil_pin2 = 35;              // Pin used to read data from GPIO35 ADC_CH7. Middle
+int soil_pin3 = 32;              // Pin used to read data from GPIO32 ADC_CH4. Left side
 
 // RTC_DATA_ATTR used to store data in RTC memory. 
-// A counter that tracks how many times ESP32 has been woken up from deep sleep
+// A counter that tracks how many times ESP32 has been waken up from deep sleep
 RTC_DATA_ATTR int boot_counter = 0;
 
 // Array Variables that store sensor measurements
@@ -71,7 +71,6 @@ float find_avg(float array[]){
   float sum  = 0;                          // Sets the sum as 0 
   for (int i = 0; i < num_readings; i++){  // Uses a for loop to iterate througt all values in the array
     sum += array[i];                       // Adds value to the sum 
-    // Serial.print("   ");Serial.println(array[i]);
   }
   float avg = sum / num_readings;          // Finding average
   return avg;
@@ -101,17 +100,13 @@ void setup(){
   pinMode(soil_pin2, INPUT);
   pinMode(soil_pin3, INPUT);
 
-  pinMode(led_pin1, OUTPUT);
-  pinMode(led_pin2, OUTPUT);
-  pinMode(led_pin3, OUTPUT);
-
   //Defining wakeup reasons
   esp_sleep_enable_timer_wakeup(sleep_time*seconds);
 
   //Setting up ext lib's
   aht.begin();                // Starts the function to retreve temp and humid
 
-  // Boot counter still in progress. Gather soil data and store it.
+  // Boot counter still in progress? Gather data and store it or next boot.
   if(boot_counter != (num_readings)){
     sensors_event_t humidity,temp;
     aht.getEvent(&humidity, &temp);
@@ -128,8 +123,8 @@ void setup(){
     esp_deep_sleep_start();
   }
 
-  // Check if the desired amounts of boots has been reached, 
-  // then it will find the average value of each sensor array and publish to UBIDOTS.
+  // Desired amounts of boots has been reached, 
+  // Find the average value of each sensor array and publish to UBIDOTS.
   else{
     boot_counter = 0;                     // Resets the boot counter for new data collection
 
