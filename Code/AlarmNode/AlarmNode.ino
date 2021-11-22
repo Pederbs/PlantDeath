@@ -2,7 +2,7 @@
 #include "UbidotsEsp32Mqtt.h"
 
 //Defined temporary variables
-#define sleep_time 3
+#define sleep_time 120
 #define seconds 1000000
 
 //Components 
@@ -21,7 +21,7 @@ const int resolution = 1;
 
 unsigned long timer;
 long wait_timer = 2000;
-long alarm_duration = 5000; // 5 minutes
+long alarm_duration = 300000; // 5 minutes
 
 
 //Ubidots configs
@@ -40,7 +40,7 @@ void alarm(char *topic, byte *payload){
   alarm_status = 0;
   
   // Sets of the alarm it the temperature is under 10 degrees 
-  if(temp > critical_temp){
+  if(temp < critical_temp){
     alarm_status = 1;
     wait_timer = alarm_duration;
   }
