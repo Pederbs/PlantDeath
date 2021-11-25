@@ -43,6 +43,11 @@ void alarm(char *topic, byte *payload){
   if(temp < critical_temp){
     alarm_status = 1;
     wait_timer = alarm_duration;
+
+    ledcSetup(ledChannelLo, freqLo, resolution);
+    ledcSetup(ledChannelHi, freqHi, resolution);
+    ledcAttachPin(buzzerLo, ledChannelLo);
+    ledcAttachPin(buzzerHi, ledChannelHi);
   }
   //return alarm_status;
 }
@@ -72,10 +77,6 @@ void callback(char *topic, byte *payload, unsigned int length){
 
 void setup() {
   //Serial.begin(115200);
-  ledcSetup(ledChannelLo, freqLo, resolution);
-  ledcSetup(ledChannelHi, freqHi, resolution);
-  ledcAttachPin(buzzerLo, ledChannelLo);
-  ledcAttachPin(buzzerHi, ledChannelHi);
   //Put a timer on sleep mode.
   esp_sleep_enable_timer_wakeup(sleep_time*seconds);
 
