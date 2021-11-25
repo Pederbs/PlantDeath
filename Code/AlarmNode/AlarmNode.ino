@@ -9,7 +9,11 @@ int critical_temp = 10;
 bool alarm_status = 0;
 bool button_status = 0;
 
-// setting PWM properties
+//Delays
+unsigned long button_delay = 1000;
+unsigned long button_timer;
+
+//Setting PWM properties
 const int freqLo = 800;
 const int freqHi = 1000;
 const int ledChannelLo = 0;
@@ -55,6 +59,7 @@ void callback(char *topic, byte *payload, unsigned int length){
 }
 
 void setup() {
+  pinMode(button_pin, INPUT);
   //Serial.begin(115200);
   ledcSetup(ledChannelLo, freqLo, resolution);
   ledcSetup(ledChannelHi, freqHi, resolution);
@@ -78,7 +83,14 @@ void loop(){
     ubidots.reconnect();
     ubidots.subscribeLastValue(plant_node, subscribe_temp_variable);
   }
-  if (button_status == 1){alarm_status = 0;}
+  button_status = digitalRead(button_pin);
+  if (button_status == 1 && (millis() - button_timer) > button_delay){
+    //Serial.println("  Knapp paatrykket // alarm slaaes av");
+    button_timer = millis();
+    ledcWrite(ledChannelHi, 0);
+    ledcWrite(ledChannelLo, 0);
+    alarm_status = 0;
+  }
   if(alarm_status == 1){
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 1);
@@ -87,6 +99,10 @@ void loop(){
     ledcWrite(ledChannelLo, 0);
     ledcWrite(ledChannelHi, 1);
     delay(250);
-  } 
+  }
+  else if(alarm_status == 0){
+    ledcWrite(ledChannelHi, 0);
+    ledcWrite(ledChannelLo, 0);
+  }
   ubidots.loop();
 }
