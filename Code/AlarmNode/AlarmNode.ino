@@ -10,8 +10,8 @@ bool alarm_status = 0;
 bool button_status = 0;
 
 //Delays
-unsigned long button_delay = 1000;
-unsigned long button_timer;
+unsigned long alarm_delay = 300000; // alarm er av i 5 min
+unsigned long alarm_timer;
 
 //Setting PWM properties
 const int freqLo = 800;
@@ -83,15 +83,17 @@ void loop(){
     ubidots.reconnect();
     ubidots.subscribeLastValue(plant_node, subscribe_temp_variable);
   }
-  button_status = digitalRead(button_pin);
-  if (button_status == 1 && (millis() - button_timer) > button_delay){
+  if (alarm_status == 1){//skjekker om knapp er påtrykket bare om alarm er aktiv
+    button_status = digitalRead(button_pin); // idle state 0
+  }
+  if (button_status == 1 && (millis() - alarm_timer) > alarm_delay){//knapp eller timer skrur av alarmen
     //Serial.println("  Knapp paatrykket // alarm slaaes av");
-    button_timer = millis();
+    alarm_timer = millis();
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 0);
     alarm_status = 0;
   }
-  if(alarm_status == 1){
+  if(alarm_status == 1){// alarm på
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 1);
     delay(250);
@@ -100,7 +102,7 @@ void loop(){
     ledcWrite(ledChannelHi, 1);
     delay(250);
   }
-  else if(alarm_status == 0){
+  else if(alarm_status == 0){//forsikrer om at alarm er av
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 0);
   }
