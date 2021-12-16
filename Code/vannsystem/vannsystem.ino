@@ -42,38 +42,56 @@ void watersystem(char *topic, byte *payload)
       // Led represents pump being active. 
       digitalWrite(led1, HIGH);
       Serial.println("Pump water to plant 1 for a few seconds");
-      // Simulates an example where function takes longer than the timer for esp32 being awake
-      for(int i = 0; i<50; i++)
+      // Simulates a function when water is being pumped
+      for(int i = 0; i<5; i++)
       {
-        Serial.println(i);
+        Serial.print(i);
+        Serial.print("s..");
         delay(1000);
       }
       digitalWrite(led1, LOW);
+      Serial.println("Stopped pumping water to plant 1");
     }
     else if(strstr(topic, "soil2"))
     {
       digitalWrite(led2, HIGH);
       Serial.println("Pump water to plant 2 for a few seconds");
-      delay(2000);
+      for(int i = 0; i<5; i++)
+      {
+        Serial.print(i);
+        Serial.print("s..");
+        delay(1000);
+      }
       digitalWrite(led2, LOW);
+      Serial.println("Stopped pumping water to plant 2");
     }
     else if(strstr(topic, "soil3"))
     {
       digitalWrite(led3, HIGH);
       Serial.println("Pump water to plant 3 for a few seconds");
-      delay(2000);
+      for(int i = 0; i<5; i++)
+      {
+        Serial.print(i);
+        Serial.print("s..");
+        delay(1000);
+      }
       digitalWrite(led3, LOW);
+      Serial.println("Stopped pumping water to plant 3");
     }
     else
     {
-      Serial.println("Data not be used");
+      Serial.println("Something missing");
     }
+  }
+  else
+  {
+    Serial.println("Humidity is above 70%");
   }
 }
 void callback(char *topic, byte *payload, unsigned int length)
 {
-  //Store the payload
-  payload[length] = '\0'; // Make payload a string by NULL terminating it.
+
+  payload[length] = '\0'; // NULL terminating payload.
 
   // Print out where the message came from and what the payload has stored. 
   Serial.print("Message arrived [");
@@ -132,7 +150,7 @@ void loop()
   }
   if((millis()-timer) > deep_sleep_frequency)
   {
-    Serial.println("Yeet");
+    Serial.println("Going to sleep");
     esp_deep_sleep_start();    
   }  
   ubidots.loop();
