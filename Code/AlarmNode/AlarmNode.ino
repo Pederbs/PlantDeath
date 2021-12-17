@@ -22,8 +22,8 @@ const int resolution = 1; // Amplitude og PWM is set to resolution of 1 bit
 
 //Ubidots configs
 const char *ubidots_token = "BBFF-zAB17mfcz5sGxEz17GPb5cSsyHPkRH";
-const char *wifi_ssid = ""; // Insert WiFi name here
-const char *wifi_pass = ""; // Insert WiFi password here
+const char *wifi_ssid = "iProbe"; // Insert WiFi name here
+const char *wifi_pass = "Torpedor"; // Insert WiFi password here
 const char *alarm_esp32_node = "alarm";
 const char *plant_node = "demo";
 const char *subscribe_temp_variable = "temperature";
@@ -46,6 +46,7 @@ void callback(char *topic, byte *payload, unsigned int length){
 }
 
 void setup() {
+  Serial.begin(115200);
   pinMode(button_pin, INPUT);
   ledcSetup(ledChannelLo, freqLo, resolution);
   ledcSetup(ledChannelHi, freqHi, resolution);
@@ -71,8 +72,10 @@ void loop(){
   }
   if (alarm_status == 1){// Checks if the button is activated only if the alarm is active
     button_status = digitalRead(button_pin); // Idle state 0
+    Serial.println(button_status);
   }
   if (button_status == 1 && (millis() - alarm_timer) > nominal_alarm_time){// Button or timer deactivated the alarm
+    Serial.println("ALARM Skrus AV");
     alarm_timer = millis();
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 0);
