@@ -46,7 +46,6 @@ void callback(char *topic, byte *payload, unsigned int length){
 }
 
 void setup() {
-  Serial.begin(115200);
   pinMode(button_pin, INPUT);
   ledcSetup(ledChannelLo, freqLo, resolution);
   ledcSetup(ledChannelHi, freqHi, resolution);
@@ -70,12 +69,9 @@ void loop(){
     ubidots.reconnect();
     ubidots.subscribeLastValue(plant_node, subscribe_temp_variable);
   }
-  if (alarm_status == 1){// Checks if the button is activated only if the alarm is active
-    button_status = digitalRead(button_pin); // Idle state 0
-    Serial.println(button_status);
-  }
+  // Checks if the button is activated only if the alarm is active
+  if (alarm_status == 1){button_status = digitalRead(button_pin);} // Idle state 0
   if (button_status == 1 && (millis() - alarm_timer) > nominal_alarm_time){// Button or timer deactivated the alarm
-    Serial.println("ALARM Skrus AV");
     alarm_timer = millis();
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 0);
