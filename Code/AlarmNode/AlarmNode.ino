@@ -71,7 +71,7 @@ void loop(){
   }
   // Checks if the button is activated only if the alarm is active
   if (alarm_status == 1){button_status = digitalRead(button_pin);} // Idle state 0
-  if (button_status == 1 && (millis() - alarm_timer) > nominal_alarm_time){// Button or timer deactivated the alarm
+  if (button_status == 1 || (millis() - alarm_timer) > nominal_alarm_time){// Button or timer deactivated the alarm
     alarm_timer = millis();
     ledcWrite(ledChannelHi, 0);
     ledcWrite(ledChannelLo, 0);
