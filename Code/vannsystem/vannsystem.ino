@@ -25,9 +25,12 @@ uint16_t subscribe_soil2;
 uint16_t subscribe_soil3;
 
 Ubidots ubidots(ubidots_token);
-
-//Takes the data from payload and checks which sensor the payload came from. 
+ 
 void watersystem(char *topic, byte *payload)
+/*
+A function that takes the data from payload and check how moist the sensor value is.
+Then it checks the topic to see which soil sensor the payload came from. 
+*/
 {
   int percentage = atoi((char *)payload);
   
@@ -35,11 +38,11 @@ void watersystem(char *topic, byte *payload)
   if(percentage < 70)
   {
     // Using cstring to compare with the characters with following string.
-    // If the characters involves "soil1", then we run functions for pump 1 that'll pump water for plant1. 
+    // If the characters in topic involves "soil1", then we run functions for pump 1 that'll pump water for plant1. 
     if(strstr(topic, "soil1"))
     {
       // Here runs a simulation of a function that would normally water the patch of earth.
-      // Led represents pump being active. 
+      // LED represents pump being active. 
       digitalWrite(led1, HIGH);
       Serial.println("Pump water to plant 1 for a few seconds");
       // Simulates a function when water is being pumped
@@ -49,6 +52,7 @@ void watersystem(char *topic, byte *payload)
         Serial.print("s..");
         delay(1000);
       }
+      // Turning off the LED to represent that pumping has stopped. 
       digitalWrite(led1, LOW);
       Serial.println("Stopped pumping water to plant 1");
     }
@@ -85,15 +89,16 @@ void watersystem(char *topic, byte *payload)
   }
   else
   {
-    Serial.println("Humidity is above 70%");
+    Serial.println("Moisture is above 70%");
   }
 }
+
 void callback(char *topic, byte *payload, unsigned int length)
 {
 
   payload[length] = '\0'; // NULL terminating payload.
 
-  // Print out where the message came from and what the payload has stored. 
+  // Print out the topic of the message (where the message came from) and it's payload. 
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
@@ -103,7 +108,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   }
   Serial.println();
 
-  // If the topic involves any word about soilsensor, then we send the data to compare the value and which sensor should get water if needed. 
+  // If the topic involves any word about soil, then we send the data to compare the value and which sensor should get water if needed. 
   if(strstr(topic, "soil"))
   {
     watersystem(topic, payload);
@@ -136,8 +141,9 @@ void setup()
 
 }
 
+// Variables used to time when the system should go to deep sleep
 unsigned long timer = millis();
-long deep_sleep_frequency = 30000;
+long deep_sleep_timer = 30000;
 
 void loop() 
 {
@@ -148,10 +154,12 @@ void loop()
     subscribe_soil2;
     subscribe_soil3;
   }
-  if((millis()-timer) > deep_sleep_frequency)
+  // If the code has run for longer than the timer has been set, then the system goes to deep sleep. 
+  if((millis()-timer) > deep_sleep_timer)
   {
     Serial.println("Going to sleep");
     esp_deep_sleep_start();    
-  }  
+  }
+
   ubidots.loop();
 }
